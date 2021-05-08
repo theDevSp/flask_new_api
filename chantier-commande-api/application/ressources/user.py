@@ -64,17 +64,29 @@ class UserLogin(Resource):
     @classmethod
     def post(cls):
         user_json = request.get_json()
-        #user_data = user_schema.load(user_json)
         
-        uid = oCommon.authenticate(oDB, user_json.get('username'), user_json.get('password'), {})
+        
+        uid = oCommon.authenticate(oDB, user_json.get('username',None), user_json.get('password',None), {})
 
-       
+        
+        
         if uid:
+
+            user_if_exist = UserModel.find_by_username(user_json.get('username',None))
+            if user_if_exist:
+                print('exits {}'.format(user_if_exist.public_id))
+            else:
+
+                encrypted_pass = Fernet(str.encode(eKey)).encrypt(user_json.get('password').encode())
+                new_user = {'uid':uid,'username':user_json.get('username'),'password':encrypted_pass,'public_id':str(uuid.uuid4())}
+                access_token = create_access_token(identity=new_user.get('public_id',0), fresh=True)
+                refresh_token = create_refresh_token(new_user.get('public_id',0))
+                user = user_schema.load(new_user)
+
+                user.save_to_db()
             
-            encrypted_pass = Fernet(str.encode(eKey)).encrypt('444'.encode())
-            access_token = create_access_token(identity=uuid.uuid4(), fresh=True)
-            #refresh_token = create_refresh_token(user.id)
-            return {"access_token": access_token, "refresh_token": "refresh_token"}, 200
+
+            return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
         return {"message": "user_invalid_credentials"}, 401
 

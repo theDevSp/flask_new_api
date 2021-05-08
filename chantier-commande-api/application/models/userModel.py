@@ -7,12 +7,16 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.Integer,  unique=True)
     username = db.Column(db.String(80), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=False)
-    public_id = db.Column(db.String(80))
+    password = db.Column(db.String(255), nullable=False)
+    public_id = db.Column(db.String(255))
 
     @classmethod
     def find_by_id(cls, _id: int) -> "UserModel":
         return cls.query.filter_by(public_id=_id).first()
+
+    @classmethod
+    def find_by_username(cls, username: str) -> "UserModel":
+        return cls.query.filter_by(username=username).first()
 
     def save_to_db(self) -> None:
         db.session.add(self)

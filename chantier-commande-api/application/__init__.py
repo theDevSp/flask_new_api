@@ -16,6 +16,11 @@ def init_app():
     ma.init_app(app)
     api = Api(app)
 
+    @app.before_first_request
+    def create_tables():
+        print('db created')
+        db.create_all()
+
     jwt = JWTManager(app)
     with app.app_context():
         from application.ressources.user import UserLogin
