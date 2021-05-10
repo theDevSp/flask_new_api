@@ -18,12 +18,12 @@ def init_app():
 
     @app.before_first_request
     def create_tables():
-        print('db created')
         db.create_all()
 
     jwt = JWTManager(app)
     with app.app_context():
-        from application.ressources.user import UserLogin
+        from application.ressources.user import UserLogin,User
         api.add_resource(UserLogin, "/login")
+        api.add_resource(User, "/user/<string:username>")
 
         return app

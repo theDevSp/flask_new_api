@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request,current_app
+from flask import request
 from werkzeug.security import safe_str_cmp
 from flask_jwt_extended import (
     create_access_token,
@@ -20,7 +20,7 @@ user_schema = UserSchema()
 oModel = om.ODOO_MODEL
 oCommon = om.ODOO_COMMON
 oDB = om.ODOO_DB
-eKey = current_app.config['ENCRYPTION_KEY']
+
 
 class UserRegister(Resource):
     @classmethod
@@ -43,11 +43,11 @@ class User(Resource):
     """
 
     @classmethod
-    def get(cls, user_id: int):
-        user = UserModel.find_by_id(user_id)
+    def get(cls, username: str):
+        user = UserModel.find_by_username(username)
         if not user:
             return {"message": gettext("user_not_found")}, 404
-
+        
         return user_schema.dump(user), 200
 
     @classmethod
@@ -64,27 +64,28 @@ class UserLogin(Resource):
     @classmethod
     def post(cls):
         user_json = request.get_json()
+        username = user_json.get('username',None)
+        password = user_json.get('password',None)
         
-        
-        uid = oCommon.authenticate(oDB, user_json.get('username',None), user_json.get('password',None), {})
-
-        
+        uid = oCommon.authenticate(oDB, username, password, {})
         
         if uid:
 
-            user_if_exist = UserModel.find_by_username(user_json.get('username',None))
+            encrypted_pass = UserModel.encryptMsg(password)
+            new_user = {'uid':uid,'username':username,'password':encrypted_pass,'public_id':str(uuid.uuid4())}
+            user_if_exist = UserModel.find_by_username(username)
+            user = user_schema.load(new_user)
+            identity = None
             if user_if_exist:
-                print('exits {}'.format(user_if_exist.public_id))
+                identity = user_if_exist.public_id = str(uuid.uuid4())
+                user_if_exist.save_to_db()
             else:
-
-                encrypted_pass = Fernet(str.encode(eKey)).encrypt(user_json.get('password').encode())
-                new_user = {'uid':uid,'username':user_json.get('username'),'password':encrypted_pass,'public_id':str(uuid.uuid4())}
-                access_token = create_access_token(identity=new_user.get('public_id',0), fresh=True)
-                refresh_token = create_refresh_token(new_user.get('public_id',0))
-                user = user_schema.load(new_user)
-
+                identity = new_user.get('public_id',0)
                 user.save_to_db()
-            
+
+            print(om.check_access_rights(user,'public.market','write'))
+            access_token = create_access_token(identity=identity, fresh=True)
+            refresh_token = create_refresh_token(new_user.get('public_id',0))
 
             return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
