@@ -67,25 +67,12 @@ class UserLogin(Resource):
         username = user_json.get('username',None)
         password = user_json.get('password',None)
         
-        uid = oCommon.authenticate(oDB, username, password, {})
-        
-        if uid:
+        res = UserModel.login(username,password,user_schema)
+        UserModel.get_user_infos()
+        if res:
 
-            encrypted_pass = UserModel.encryptMsg(password)
-            new_user = {'uid':uid,'username':username,'password':encrypted_pass,'public_id':str(uuid.uuid4())}
-            user_if_exist = UserModel.find_by_username(username)
-            user = user_schema.load(new_user)
-            identity = None
-            if user_if_exist:
-                identity = user_if_exist.public_id = str(uuid.uuid4())
-                user_if_exist.save_to_db()
-            else:
-                identity = new_user.get('public_id',0)
-                user.save_to_db()
-
-            print(om.check_access_rights(user,'public.market','write'))
-            access_token = create_access_token(identity=identity, fresh=True)
-            refresh_token = create_refresh_token(new_user.get('public_id',0))
+            access_token = create_access_token(identity=res, fresh=True)
+            refresh_token = create_refresh_token(res)
 
             return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
