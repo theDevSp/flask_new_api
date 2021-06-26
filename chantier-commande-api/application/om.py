@@ -1,5 +1,8 @@
 from flask import current_app
 import xmlrpc.client as xmlrpclib
+import sys
+from application.ressources.errors import InvalidUsage
+
 
 
 class OdooModel:
@@ -13,7 +16,20 @@ class OdooModel:
         ODOO_MODEL = xmlrpclib.ServerProxy('{}/xmlrpc/2/object'.format(str(ODOO_URL)))
 
     @classmethod
-    def check_access_rights(cls,user,module,option):
-        if not cls.ODOO_MODEL.execute_kw(cls.ODOO_DB, user.uid, user.decryptMsg(user.password),module, 'check_access_rights',[option], {'raise_exception': False}):
-            return False
+    def check_access_rights(cls,user,option,*args):
+        
+        if user:    
+            for module in args:
+                try:
+                    res = cls.ODOO_MODEL.execute_kw(cls.ODOO_DB, user.uid, user.decryptMsg(user.password),module, 'check_access_rights',[option], {'raise_exception': False})
+                except Exception:
+                    raise InvalidUsage(str(sys.exc_info()[1]))
+                    
+                if not res :
+                    raise InvalidUsage("User {} has no {} right to access {}".format(user.username,option,module), status_code=403)
+        else:
+            raise InvalidUsage("Aucun utilisateur trouver ou session expirée.")       
         return True 
+
+
+
