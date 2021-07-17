@@ -1,0 +1,4 @@
+CREATE ROLE simple_user WITH LOGIN PASSWORD 'password';
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON stock_external_move,article_commande TO simple_user;
+GRANT SELECT ON res_partner,res_users,purchase_order,purchase_order_line,fleet_vehicle,fleet_vehicle_chantier,fleet_vehicle_chantier_responsable,stock_picking,stock_move TO simple_user;

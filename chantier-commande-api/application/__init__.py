@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from application.config import configurations as cfg
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS
 
 
 from application.db import db
@@ -24,7 +23,6 @@ def init_app():
     db.init_app(app)
     ma.init_app(app)
     api = Api(app)
-    cors = CORS(app)
     @app.before_first_request
     def create_tables():
         db.create_all()
@@ -60,6 +58,7 @@ def init_app():
         from application.ressources.responsbleResource import ResponsableResource
         from application.ressources.commande.bceResource import BceResource
         from application.ressources.commande.bceLineResource import BceLineResource
+        from application.ressources.add_attribution import add
         api.add_resource(UserLogin, "/login")
         api.add_resource(User, "/user")
         api.add_resource(ChantierResource, "/chantier")
@@ -72,6 +71,7 @@ def init_app():
         api.add_resource(BceResource, "/commande/<int:bce_id>",endpoint='update-delete')
         api.add_resource(BceLineResource, "/commande_line",endpoint='create-get-line')
         api.add_resource(BceLineResource, "/commande_line/<int:bce_line_id>",endpoint='update-delete-line')
+        api.add_resource(add, "/attribution")
 
         return app
     

@@ -77,7 +77,7 @@ class UserModel(db.Model):
         
         
         if uid:
-            t=[]
+            
             encrypted_pass = cls.encryptMsg(password)
             employee_id = oModel.execute_kw(oDB, uid, password,
                         'res.users', 'read', [uid], {'fields': ['employee_id','role']})
@@ -116,7 +116,8 @@ class UserModel(db.Model):
                     'res.users',
                     'fleet.vehicle',
                     'fleet.vehicle.chantier',
-                    'fleet.vehicle.chantier.users'
+                    'fleet.vehicle.chantier.users',
+                    'fleet.vehicle.chantier.responsable'
                 ]
             
         if kwargs:

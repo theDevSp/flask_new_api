@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "chantier-commande-api",
+			"path": "."
+		},
+		{
+			"name": "chantier_service_handler",
+			"path": "../../chantier_service_handler"
+		},
+		{
+			"path": "../../end_payment"
+		}
+	],
+	"settings": {}
+}
