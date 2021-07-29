@@ -1,3 +1,4 @@
+import datetime
 from flask_restful import Resource
 from flask import request
 from flask_jwt_extended import (
@@ -91,7 +92,7 @@ class UserLogin(Resource):
         
         if res:
 
-            access_token = create_access_token(identity=res, fresh=True)
+            access_token = create_access_token(identity=res, fresh=True, expires_delta=datetime.timedelta(days=365))
             refresh_token = create_refresh_token(res)
             user_data = UserModel.get_user_infos(username=username)
             user = UserModel.find_by_username(username=username)
@@ -99,7 +100,7 @@ class UserLogin(Resource):
             if user_data:
                 return {"access_token": access_token, "refresh_token": refresh_token,"user":user_data,"chantier":chantier_data}, 200
 
-        return {"message": "Login ou mot de passe incorrect Veuillez réessayer"}, 401
+        return {"msg": "Login ou mot de passe incorrect Veuillez réessayer"}, 401
 
 
 class UserLogout(Resource):

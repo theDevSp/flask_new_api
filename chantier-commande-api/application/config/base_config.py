@@ -1,6 +1,6 @@
 """Flask config class."""
 import os
-
+from datetime import timedelta
 
 class BaseConfig:
     """Base config vars."""
@@ -10,6 +10,6 @@ class BaseConfig:
     PROPAGATE_EXCEPTIONS = True
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
-    
-
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=10)
     

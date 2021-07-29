@@ -19,6 +19,7 @@ def init_app():
     app = Flask(__name__)
     load_dotenv(".env")
     app.config.from_object(cfg['development'])
+    
 
     db.init_app(app)
     ma.init_app(app)

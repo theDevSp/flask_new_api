@@ -111,9 +111,9 @@ class BceLineModel(DocumentsLineModel):
                     data['create_uid'] = data['create_uid'][1]
                     data['created_by'] = data.pop('create_uid')
                 if 'vehicle_id' in data:
-                    data['vehicle_id'] = data['vehicle_id'][0] if data['vehicle_id'] else ""
+                    data['vehicle_id'] = data['vehicle_id'][0] if data['vehicle_id'] else 0
                 if 'num_prix_id' in data:
-                    data['num_prix_id'] = data['num_prix_id'][0] if data['num_prix_id'] else ""
+                    data['num_prix_id'] = data['num_prix_id'][0] if data['num_prix_id'] else 0
                 if 'external_id' in data:
                     data['external_id'] = int(data['external_id'][0])
                     data['bce_id'] = data.pop('external_id')

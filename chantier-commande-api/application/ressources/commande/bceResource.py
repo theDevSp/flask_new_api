@@ -21,12 +21,11 @@ class BceResource(Resource):
     @jwt_required()
     def get(cls):
         bce_id = request.args.get('id', default = 0, type = int)
-        ch_id = request.args.get('ch_id', default = 0, type = int)
+        ch_id = request.args.get('ch_id', default = 0, type = str)
         fields = request.args.get('fd',default="", type= str )
         line_fields = request.args.get('ln_fd',default="", type= str )
         notif = request.args.get('notif',default=False, type= bool )
 
-        
         user_public_id = get_jwt_identity()
         user = UserModel.find_by_public_id(user_public_id)
 
@@ -34,15 +33,20 @@ class BceResource(Resource):
             if bce_id: 
                 res = BceModel.get_bce_by_id(bce_id,user,fields.split(',')) if fields else BceModel.get_bce_by_id(bce_id,user)
                 res['line'] = BceLineModel.get_bce_line_by_bce_id(bce_id,user,line_fields.split(',')) if line_fields else BceLineModel.get_bce_line_by_bce_id(bce_id,user,)
-                res['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(bce_id,user)
+                res['commande']['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(bce_id,user)
                 return res
             if ch_id:
-                result = BceModel.get_bce_by_ch_id(ch_id,user,fields.split(','),notif=notif) if fields else BceModel.get_bce_by_ch_id(ch_id,user,notif=notif)    
-                if not notif:
-                    for res in result:
-                        res['line'] = BceLineModel.get_bce_line_by_bce_id(res['id'],user,BceLineModel.transform_data(line_fields.split(','))) if line_fields else BceLineModel.get_bce_line_by_bce_id(res['id'],user)
-                        res['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(res['id'],user)
-                return result
+                resFinal = []
+                for ch in ch_id.split(','):
+                    
+                    result = BceModel.get_bce_by_ch_id(int(ch),user,fields.split(','),notif=notif) if fields else BceModel.get_bce_by_ch_id(int(ch),user,notif=notif)    
+                    if not notif:
+                        for res in result:
+                            res['line'] = BceLineModel.get_bce_line_by_bce_id(res['id'],user,BceLineModel.transform_data(line_fields.split(','))) if line_fields else BceLineModel.get_bce_line_by_bce_id(res['id'],user)
+                            res['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(res['id'],user)
+                    for r in result:
+                        resFinal.append(r)
+                return resFinal
         else:
             return om.check_access_rights(user,'read',*cls.models)
     
