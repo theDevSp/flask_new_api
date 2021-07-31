@@ -46,6 +46,7 @@ class BceResource(Resource):
                             res['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(res['id'],user)
                     for r in result:
                         resFinal.append(r)
+                
                 return resFinal
         else:
             return om.check_access_rights(user,'read',*cls.models)
