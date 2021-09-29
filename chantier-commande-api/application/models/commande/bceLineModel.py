@@ -123,6 +123,8 @@ class BceLineModel(DocumentsLineModel):
                     data['ref'] = data.pop('ref_external')
                 if 'qty_external' in data:
                     data['qty'] = data.pop('qty_external')
+                if 'note' in data:
+                    if isinstance(data['note'],bool): data['note'] = '' 
 
         return datas
 

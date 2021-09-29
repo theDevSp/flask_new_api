@@ -94,6 +94,7 @@ class UserLogin(Resource):
 
             access_token = create_access_token(identity=res, fresh=True, expires_delta=datetime.timedelta(days=365))
             refresh_token = create_refresh_token(res)
+            
             user_data = UserModel.get_user_infos(username=username)
             user = UserModel.find_by_username(username=username)
             chantier_data = ChantierModel.get_chantier_by_user_id(user)

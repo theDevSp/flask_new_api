@@ -16,7 +16,11 @@ oDB = om.ODOO_DB
 class ChantierModel():
 
     _model_ch = 'fleet.vehicle.chantier'
-    _model_ch_users = 'fleet.vehicle.chantier.responsable'
+    _model_ch_users = [
+        'fleet.vehicle.chantier.users',
+        'fleet.vehicle.chantier.pointeur',
+        'fleet.vehicle.chantier.chef',
+        ]
 
     def __init__(self,id,name,use,atelier):
         self.id = id
@@ -29,12 +33,18 @@ class ChantierModel():
     def get_chantier_by_user_id(cls,user):
         
         res = []
+        chantierList = []
+        model = ''
+        if user.role in [4,5,6,7]:
+            model = cls._model_ch_users[1]
+        elif user.role == 3:
+            model = cls._model_ch_users[0]
+        else:
+            model = cls._model_ch_users[2]
+        chantierList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+                 model, 'search_read',
+                [[['employee_id','=',user.employee_id]]],{'fields': ['chantier_id']})
         
-
-        chantierList =  oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
-                    cls._model_ch_users, 'search_read',
-                    [[['employee_id','=',user.employee_id]]],{'fields': ['chantier_id']})
-
         for chantier in chantierList:
             ch_id = chantier['chantier_id'][0]
             ch_info = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
@@ -53,6 +63,7 @@ class ChantierModel():
             notifRes = BceModel.get_bce_by_ch_id(ch_id,user,data=['name','create_date'],notif=True) 
                 
             bce_count = BceModel.get_count_bce_by_ch_id(ch_id,user)
+            firstId = BceModel.get_first_bce_by_ch_id(ch_id,user)
             res.append({
                         "id":ch_id,
                         "name":chantier['chantier_id'][1],
@@ -62,6 +73,7 @@ class ChantierModel():
                         "responsables":responsables,
                         "prices":numPrices,
                         "bce_count":bce_count,
+                        "first_bce":firstId,
                         "commande":result,
                         "notification":notifRes
                         })

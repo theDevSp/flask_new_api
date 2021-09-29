@@ -31,7 +31,7 @@ class NumPrixModel():
 
         prices_list = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                         cls._model_market_template_line, 'search_read',
-                        [[['attachement_id', '=', template_id]]],
+                        [[['attachement_id', '=', template_id],['name','!=',False]]],
                         {'fields': ['name','price_number','quantity','uom']})
 
         for price in prices_list:

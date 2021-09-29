@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from application.config import configurations as cfg
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
-
-
+from sentry_sdk.integrations.flask import FlaskIntegration
+import sentry_sdk
 from application.db import db
 from application.ma import ma
 
@@ -16,6 +16,21 @@ from application.ressources.errors import InvalidUsage
 
 
 def init_app():
+    sentry_sdk.init(
+    dsn="https://8390c233a65b486d85ec760f8b7223d1@o465828.ingest.sentry.io/5777150",
+    integrations=[FlaskIntegration()],
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+
+    # By default the SDK will try to use the SENTRY_RELEASE
+    # environment variable, or infer a git commit
+    # SHA as release, however you may want to set
+    # something more human-readable.
+    # release="myapp@1.0.0",
+)
     app = Flask(__name__)
     load_dotenv(".env")
     app.config.from_object(cfg['development'])
@@ -59,7 +74,7 @@ def init_app():
         from application.ressources.responsbleResource import ResponsableResource
         from application.ressources.commande.bceResource import BceResource
         from application.ressources.commande.bceLineResource import BceLineResource
-        from application.ressources.add_attribution import add
+        from application.ressources.add_attribution import add,update
         api.add_resource(UserLogin, "/login")
         api.add_resource(User, "/user")
         api.add_resource(ChantierResource, "/chantier")
@@ -73,6 +88,7 @@ def init_app():
         api.add_resource(BceLineResource, "/commande_line",endpoint='create-get-line')
         api.add_resource(BceLineResource, "/commande_line/<int:bce_line_id>",endpoint='update-delete-line')
         api.add_resource(add, "/attribution")
+        api.add_resource(update, "/attribution1")
 
         return app
     

@@ -16,6 +16,10 @@ class InvalidUsage(Exception):
         elif 'mandatory field is not correctly set' in message:
             self.status_code = 400
             self.message = "Request mal formé veuillez verifier le champs " + message.split(":")[len(message.split(":"))-1].replace(']\'>','')
+        elif 'Fault' in message:
+            self.status_code = 500
+            self.message = "Erreur interne " + message.split(":")[len(message.split(":"))-1].replace(']\'>','')
+        
         self.message = message
         self.payload = payload
 

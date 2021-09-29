@@ -73,6 +73,7 @@ class BceModel(DocumentsModel):
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[[['id', '=', id]]],
                         {'fields': data})
         except Exception:
+            
             raise InvalidUsage(str(sys.exc_info()[1]))
         if res :
              result['commande'] = cls.transform_data(res,'client')[0]
@@ -104,7 +105,9 @@ class BceModel(DocumentsModel):
 
         try:
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[where],{'fields': data,'limit':limit,'order':"id desc"})
+           
         except Exception:
+            
             raise InvalidUsage(str(sys.exc_info()[1]))
 
         return cls.transform_data(res,'client')
@@ -118,7 +121,23 @@ class BceModel(DocumentsModel):
             raise InvalidUsage(str(sys.exc_info()[1]))
 
         return res
+
+    @classmethod
+    def get_first_bce_by_ch_id(cls,ch_id,user):
+
+        where = [['chantier_id', '=', ch_id]]
         
+        if user.role in [3,6]:
+            where.append(['type_bon','=','Engin'])
+        if user.role in [2,5]:
+            where.append(['type_bon','=','Chantier'])
+
+        try:
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[where],{'fields': ['id'],'limit':1})
+        except Exception:
+            raise InvalidUsage(str(sys.exc_info()[1]))
+
+        return res[0]['id']    
 
     @classmethod
     def transform_data(cls,datas,direction='odoo'):
