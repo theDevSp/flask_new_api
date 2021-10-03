@@ -67,7 +67,7 @@ class BceModel(DocumentsModel):
     @classmethod
     def get_bce_by_id(cls,id,user,data=['name','type_bon','employee_id','create_uid','service','create_date','state','chantier_id','write_date','note']):
         
-        result = {'commande':[]}
+        result = [{'commande':[]}]
 
         try:
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[[['id', '=', id]]],
@@ -76,7 +76,7 @@ class BceModel(DocumentsModel):
             
             raise InvalidUsage(str(sys.exc_info()[1]))
         if res :
-             result['commande'] = cls.transform_data(res,'client')[0]
+             result[0]['commande'] = cls.transform_data(res,'client')[0]
 
         return result
     
@@ -169,6 +169,35 @@ class BceModel(DocumentsModel):
                     if isinstance(data['note'],bool): data['note'] = '' 
         
         return datas
+
+    @classmethod
+    def verify_action_permission(cls,id,data,user):
+        state = cls.get_bce_by_id(id,user,['state'])['commande']['state']
+        
+        if "state" in data:
+            if "valid" in data["state"] and state != "draft":
+                raise InvalidUsage("Action Non autorisée vous ne pouvez pas valider cette commande.")
+            
+            if "cancel" in data["state"] and cls.verify_bce_docs(id,user) > 0:
+                raise InvalidUsage("Action Non autorisée cette commande est déjâ traitée vous ne pouvez pas l'annuler.")
+            
+            if "draft" in data["state"] and cls.verify_bce_docs(id,user) > 0 and state not in ['draft','valid','correct']:
+                raise InvalidUsage("Action Non autorisée cette commande est déjâ traitée vous ne pouvez pas la modifier")
+            
+        return True
+    
+    @classmethod
+    def verify_bce_docs(cls,id,user):
+        res = 0
+
+        try:
+            res += oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), "stock.picking", 'search_count',[[['bce_chantier','=',id]]])
+            res += oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), "purchase.requisition", 'search_count',[[['bce_chantier','=',id]]])
+        except Exception:
+            raise InvalidUsage(str(sys.exc_info()[1]))
+        return res
+
+
     @classmethod
     def getColumnsFromList(cls,s): 
         str1 = "" 

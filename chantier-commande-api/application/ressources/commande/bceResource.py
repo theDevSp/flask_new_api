@@ -33,8 +33,8 @@ class BceResource(Resource):
         if om.check_access_rights(user,'read',*cls.models) == True:
             if bce_id: 
                 res = BceModel.get_bce_by_id(bce_id,user,fields.split(',')) if fields else BceModel.get_bce_by_id(bce_id,user)
-                res['line'] = BceLineModel.get_bce_line_by_bce_id(bce_id,user,line_fields.split(',')) if line_fields else BceLineModel.get_bce_line_by_bce_id(bce_id,user,)
-                res['commande']['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(bce_id,user)
+                res[0]['line'] = BceLineModel.get_bce_line_by_bce_id(bce_id,user,line_fields.split(',')) if line_fields else BceLineModel.get_bce_line_by_bce_id(bce_id,user,)
+                res[0]['commande']['line_count'] = BceLineModel.get_count_bce_line_by_bce_id(bce_id,user)
                 return res
             if ch_id:
                 resFinal = []
@@ -75,7 +75,9 @@ class BceResource(Resource):
         user = UserModel.find_by_public_id(user_public_id)
 
         if om.check_access_rights(user,'write',*cls.models) == True:
-            return BceModel.update_bce(bce_id,bce_json,user)
+            print(BceModel.verify_action_permission(bce_id,bce_json,user))
+            if BceModel.verify_action_permission(bce_id,bce_json,user) == True:
+                return BceModel.update_bce(bce_id,bce_json,user)
         else:
             return om.check_access_rights(user,'write',*cls.models)
     

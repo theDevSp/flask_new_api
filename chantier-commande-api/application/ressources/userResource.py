@@ -7,6 +7,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
 )
+from application.ressources.errors import InvalidUsage
 from application.models.userModel import UserModel
 from application.schemas.userSchema import UserSchema
 from application.models.chantierModel import ChantierModel
@@ -101,7 +102,6 @@ class UserLogin(Resource):
             if user_data:
                 return {"access_token": access_token, "refresh_token": refresh_token,"user":user_data,"chantier":chantier_data}, 200
 
-        return {"msg": "Login ou mot de passe incorrect Veuillez réessayer"}, 401
 
 
 class UserLogout(Resource):

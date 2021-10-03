@@ -103,9 +103,11 @@ class UserModel(db.Model):
                 except Exception:
                     raise InvalidUsage(str(sys.exc_info()[1]), status_code=500)
                 
-            
             return  identity
-        return False
+        else:
+            raise InvalidUsage("Login ou mot de passe incorrect Veuillez réessayer")
+
+        
     
     @classmethod
     def get_user_infos(cls,**kwargs):
