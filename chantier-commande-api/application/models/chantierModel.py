@@ -5,7 +5,7 @@ from application.models.commande.bceModel import BceModel
 from flask import current_app
 from application.om import OdooModel as om 
 from application.models.enginModel import EnginModel
-from application.models.employyeModel import EmployeeModel
+from application.models.entries.entriesModel import EntriesModel
 from application.models.responsable import ResponsableModel
 from application.models.numPrixModel import NumPrixModel
 import datetime as dt
@@ -60,10 +60,17 @@ class ChantierModel():
                 #ftched['line'] = bceLineModel.BceLineModel.get_bce_line_by_bce_id(ftched['id'],user,)
                 ftched['line_count'] = bceLineModel.BceLineModel.get_count_bce_line_by_bce_id(ftched['id'],user)
 
-            notifRes = BceModel.get_bce_by_ch_id(ch_id,user,data=['name','create_date'],notif=True) 
+            notifRes = BceModel.get_bce_by_ch_id(ch_id,user,data=['name','create_date','state'],notif=True) 
                 
             bce_count = BceModel.get_count_bce_by_ch_id(ch_id,user)
+            bce_count_chantier = BceModel.get_count_bce_by_ch_id_type(ch_id,user,'Chantier')
+            bce_count_engin = BceModel.get_count_bce_by_ch_id_type(ch_id,user,'Engin')
+            bce_count_achat = BceModel.get_count_bce_by_ch_id_service(ch_id,user,'Achat')
+            bce_count_magasin = BceModel.get_count_bce_by_ch_id_service(ch_id,user,'Magasin')
             firstId = BceModel.get_first_bce_by_ch_id(ch_id,user)
+            bce_count_date = BceModel.get_count_bce_by_ch_id_periode(ch_id,user)
+            entries = EntriesModel.get_entries_by_ch_period(ch_id,str(dt.datetime.now().year),str(dt.datetime.now().month-1))
+            
             res.append({
                         "id":ch_id,
                         "name":chantier['chantier_id'][1],
@@ -73,19 +80,15 @@ class ChantierModel():
                         "responsables":responsables,
                         "prices":numPrices,
                         "bce_count":bce_count,
+                        "bce_count_chantier":bce_count_chantier,
+                        "bce_count_engin":bce_count_engin,
+                        "bce_count_achat":bce_count_achat,
+                        "bce_count_magasin":bce_count_magasin,
+                        "bce_count_date":bce_count_date,
                         "first_bce":firstId,
                         "commande":result,
-                        "notification":notifRes
+                        "notification":notifRes,
+                        "entries":entries
                         })
-        """
-        bce = BceModel("bce0023","ana",1179,"test note","ghi ana")
-        to_fetch = {'name','demandeur','ch_id','service'}
-        data = {'ch_id': 179, 'demandeur': 'ana', 'service': 'ghi ana', 'name': 'bce0023','type':'type'}
-        odoo_data = {'create_uid': [98, 'POINTEUR'], 'employee_id': [2010, 'MAKHOUKHI HASSANE'],
- 'create_date': '2021-03-09 10:08:44', 'name': 'BCE00032', 'service': 'Achat',
-  'type_bon': 'Chantier', 'chantier_id': [179, 'AL HOCEIMA CONSTRUCTION DU BARRAGE SUR OUED RHISS'], 
-  'state': 'draft', 'write_date': '2021-03-09 11:04:34', 'id': 32}
-        bce = BceSchema().load(BceModel.transform_data(odoo_data,'client'))
-        print(bce)
-    """   
+  
         return res

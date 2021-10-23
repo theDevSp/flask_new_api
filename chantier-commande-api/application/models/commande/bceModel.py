@@ -1,15 +1,17 @@
+import datetime
 from application.ressources.errors import InvalidUsage
 
-from flask import current_app
+
 from application.om import OdooModel as om 
 from application.models.documentsModel import DocumentsModel
+from application.models.entries.entriesModel import EntriesModel
 import sys
 
 
 oModel = om.ODOO_MODEL
 oCommon = om.ODOO_COMMON
 oDB = om.ODOO_DB
-engin = om.ENGIN
+
 
 class BceModel(DocumentsModel):
 
@@ -82,12 +84,8 @@ class BceModel(DocumentsModel):
     
     @classmethod
     def get_bce_by_ch_id(cls,ch_id,user,data=['name','type_bon','employee_id','create_uid','service','create_date','state','chantier_id','write_date','note'],start=0,notif=False):
-        """
-        cols = cls.getColumnsFromList(data)
-        query = "select %s from %s where chantier_id = %s order by id DESC;" % (cols,cls._table,ch_id)result_set = engin.execute(query)  
-        for r in result_set:  
-            print(r.create_date)
-        """
+        
+        
         where = [['chantier_id', '=', ch_id]]
         limit=10
         if user.role in [3,6]:
@@ -96,13 +94,11 @@ class BceModel(DocumentsModel):
             where.append(['type_bon','=','Chantier'])
         if start != 0:
             where.append(['id','<',start])
-        if not notif:
-            where.append(['state','!=','draft'])  
-        else: 
-            where.append(['state','=','draft'])
+        if notif:
+            where.append(['state','=','draft'])  
             limit=''
         
-
+            
         try:
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[where],{'fields': data,'limit':limit,'order':"id desc"})
            
@@ -121,6 +117,58 @@ class BceModel(DocumentsModel):
             raise InvalidUsage(str(sys.exc_info()[1]))
 
         return res
+
+    @classmethod
+    def get_count_bce_by_ch_id_type(cls,ch_id,user,type):
+
+        try:
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_count',[[['chantier_id','=',ch_id],['type_bon','=',type]]])
+        except Exception:
+            raise InvalidUsage(str(sys.exc_info()[1]))
+
+        return res
+    
+    @classmethod
+    def get_count_bce_by_ch_id_service(cls,ch_id,user,service):
+
+        try:
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_count',[[['chantier_id','=',ch_id],['service','=',service]]])
+
+        except Exception:
+            raise InvalidUsage(str(sys.exc_info()[1]))
+
+        return res
+
+    @classmethod
+    def get_count_bce_by_ch_id_periode(cls,ch_id,user):
+
+        try:
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), 'purchase.order', 'read_group',[[('chantier_id','=',ch_id)],['create_date'],['create_date']])
+            result = []
+            temp_dict = {}
+            for item in res:
+                
+                year = item['create_date'].split()[1]
+                month_number = datetime.datetime.strptime(item['create_date'].split()[0], "%B").month 
+                count = item['create_date_count']   
+                if str(year) in temp_dict:
+                    temp_dict[str(year)].append({
+                        'm':month_number,
+                        'c':count
+                    })
+                else:
+                    temp_dict[str(year)] = []
+                    temp_dict[str(year)].append({
+                        'm':month_number,
+                        'c':count
+                    })
+            for element in temp_dict.items():
+                result.append(element)
+            
+        except Exception:
+            raise InvalidUsage(str(sys.exc_info()[1]))
+
+        return result
 
     @classmethod
     def get_first_bce_by_ch_id(cls,ch_id,user):
@@ -172,7 +220,7 @@ class BceModel(DocumentsModel):
 
     @classmethod
     def verify_action_permission(cls,id,data,user):
-        state = cls.get_bce_by_id(id,user,['state'])['commande']['state']
+        state = cls.get_bce_by_id(id,user,['state'])[0]['commande']['state']
         
         if "state" in data:
             if "valid" in data["state"] and state != "draft":

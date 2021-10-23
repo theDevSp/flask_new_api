@@ -68,14 +68,14 @@ class BceResource(Resource):
 
     @classmethod
     @jwt_required()
-    def put(cls,bce_id:int):  
+    def put(cls,bce_id):  
         bce_json = request.get_json()
 
         user_public_id = get_jwt_identity()
         user = UserModel.find_by_public_id(user_public_id)
 
         if om.check_access_rights(user,'write',*cls.models) == True:
-            print(BceModel.verify_action_permission(bce_id,bce_json,user))
+            
             if BceModel.verify_action_permission(bce_id,bce_json,user) == True:
                 return BceModel.update_bce(bce_id,bce_json,user)
         else:

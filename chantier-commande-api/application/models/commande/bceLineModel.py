@@ -73,6 +73,7 @@ class BceLineModel(DocumentsLineModel):
 
         try:
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce_line, 'search_read',[[['external_id', '=', bce_id]]],{'fields': data})
+            
         except Exception:
             raise InvalidUsage(str(sys.exc_info()[1]))
 
@@ -111,7 +112,7 @@ class BceLineModel(DocumentsLineModel):
                     data['create_uid'] = data['create_uid'][1]
                     data['created_by'] = data.pop('create_uid')
                 if 'vehicle_id' in data:
-                    data['vehicle_id'] = data['vehicle_id'][0] if data['vehicle_id'] else 0
+                    data['vehicle_id'] = data['vehicle_id'][1] if data['vehicle_id'] else ''
                 if 'num_prix_id' in data:
                     data['num_prix_id'] = data['num_prix_id'][0] if data['num_prix_id'] else 0
                 if 'external_id' in data:

@@ -18,8 +18,7 @@ class OdooModel:
     DB_URL = current_app.config['DB_URL']
     DB_CREDENTIAL = current_app.config['DB_CREDENTIAL']
 
-    if DB_URL:
-        ENGIN = create_engine(str(DB_CREDENTIAL))
+    ENGIN = create_engine(str(DB_CREDENTIAL))
 
 
     if ODOO_URL:
