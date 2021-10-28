@@ -25,7 +25,7 @@ class EnginModel():
         enginList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                 cls._model_gmao, 'search_read',
                 [[['chantier_id', '=', ch_id],['state_breakdown','not in',('vendu','rendu','deteriore')]]],
-                {'fields': ['code','license_plate','product_id','designation_id','brand_id']})
+                {'fields': ['code','license_plate','product_id','designation_id','brand_id','emplacement_chantier_id','state_breakdown','capacity']})
         for engin in enginList:
             res.append({
                 "id":engin.get("id",0),
@@ -34,6 +34,9 @@ class EnginModel():
                 "code":engin.get('code',''),
                 "desc":engin['designation_id'][1] if not isinstance(engin['designation_id'],bool) else '',
                 "brand":engin['brand_id'][1] if not isinstance(engin['brand_id'],bool) else '',
+                "place":engin['emplacement_chantier_id'][1].capitalize() if not isinstance(engin['emplacement_chantier_id'],bool) else 'Indéfini',
+                "state":engin.get('state_breakdown','').capitalize() if not isinstance(engin.get('state_breakdown',''),bool) else 'Indéfini',
+                "capacity":engin.get('capacity','') if not isinstance(engin.get('capacity',''),bool) else 'Indéfini',
             })
         return res
 
@@ -43,7 +46,7 @@ class EnginModel():
 
         enginList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                 cls._model_gmao, 'search_read',
-                [[['id', '=', id]]],{'fields': ['code','license_plate','product_id','designation_id','brand_id']})
+                [[['id', '=', id]]],{'fields': ['code','license_plate','product_id','designation_id','brand_id','emplacement_chantier_id','state_breakdown','capacity']})
         for engin in enginList:
             res.append({
                 "id":engin.get("id",0),
@@ -52,5 +55,8 @@ class EnginModel():
                 "code":engin.get('code',''),
                 "desc":engin['designation_id'][1] if not isinstance(engin['designation_id'],bool) else '',
                 "brand":engin['brand_id'][1] if not isinstance(engin['brand_id'],bool) else '',
+                "place":engin['emplacement_chantier_id'][1].capitalize() if not isinstance(engin['emplacement_chantier_id'],bool) else 'Indéfini',
+                "state":engin.get('state_breakdown','').capitalize() if not isinstance(engin.get('state_breakdown',''),bool) else 'Indéfini',
+                "capacity":engin.get('capacity','') if not isinstance(engin.get('capacity',''),bool) else 'Indéfini',
             })
         return res

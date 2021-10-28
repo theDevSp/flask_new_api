@@ -48,7 +48,7 @@ class ChantierModel():
         for chantier in chantierList:
             ch_id = chantier['chantier_id'][0]
             ch_info = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
-                    cls._model_ch, 'search_read',[[['id','=',ch_id]]],{'fields': ['usinage','atelier_stock','type']})
+                    cls._model_ch, 'search_read',[[['id','=',ch_id]]],{'fields': ['usinage','atelier_stock','type','create_date']})
             engins = EnginModel.get_engin_by_ch_id(ch_id,user)
             #employees = EmployeeModel.get_employee_by_ch_id(ch_id,user)
             responsables = ResponsableModel.get_responsable_by_ch_id(ch_id,user)
@@ -69,12 +69,13 @@ class ChantierModel():
             bce_count_magasin = BceModel.get_count_bce_by_ch_id_service(ch_id,user,'Magasin')
             firstId = BceModel.get_first_bce_by_ch_id(ch_id,user)
             bce_count_date = BceModel.get_count_bce_by_ch_id_periode(ch_id,user)
-            entries = EntriesModel.get_entries_by_ch_period(ch_id,str(dt.datetime.now().year),str(dt.datetime.now().month-1))
+            entries = EntriesModel.get_entries_by_ch_period(ch_id,str(dt.datetime.now().year),str(dt.datetime.now().month),user)
             
             res.append({
                         "id":ch_id,
                         "name":chantier['chantier_id'][1],
                         "type":ch_info[0]['type'],
+                        "date_start":ch_info[0]['create_date'],
                         "engins":engins,
                         #"employees":employees,
                         "responsables":responsables,

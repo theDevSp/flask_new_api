@@ -1,5 +1,6 @@
 from flask import current_app
 from application.om import OdooModel as om
+from application import InvalidUsage
 
 oModel = om.ODOO_MODEL
 oCommon = om.ODOO_COMMON
@@ -12,6 +13,13 @@ class NumPrixModel():
     _model_market_template_line = 'public.market.attachement.template.line'
     _model_market_attachment_line = 'public.market.attachement.line'
 
+    models=[
+        'public.market',
+        'public.market.attachement.template',
+        'public.market.attachement.template.line',
+        'public.market.attachement.line'
+    ]
+
     def __init__(self,id,name,number):
         self.id = id
         self.name = name
@@ -21,7 +29,8 @@ class NumPrixModel():
     @classmethod
     def get_price_numbers_by_ch_id(cls,ch_id,user):
         res = []
-
+        if om.check_access_rights(user,'read',*cls.models) != True:
+            raise InvalidUsage(str(om.check_access_rights(user,'read',*cls.models)), status_code=410)
         market_id = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                         cls._model_market, 'search',
                         [[['chantier_id', '=', ch_id]]])

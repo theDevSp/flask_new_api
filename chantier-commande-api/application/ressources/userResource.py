@@ -15,7 +15,7 @@ from application.blacklist import BLACKLIST
 import uuid
 from cryptography.fernet import Fernet
 from application.om import OdooModel as om
-import base64
+import sys
 from sqlalchemy import create_engine
 
 
@@ -91,13 +91,17 @@ class UserLogin(Resource):
         
         res = UserModel.login(username,password,user_schema)
         
+        
+        
         if res:
 
             access_token = create_access_token(identity=res, fresh=True, expires_delta=datetime.timedelta(days=365))
             refresh_token = create_refresh_token(res)
             
             user_data = UserModel.get_user_infos(username=username)
+            
             user = UserModel.find_by_username(username=username)
+            
             chantier_data = ChantierModel.get_chantier_by_user_id(user)
             if user_data:
                 return {"access_token": access_token, "refresh_token": refresh_token,"user":user_data,"chantier":chantier_data}, 200

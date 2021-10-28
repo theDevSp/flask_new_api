@@ -34,6 +34,6 @@ class EntriesResource(Resource):
         user = UserModel.find_by_public_id(user_public_id)
 
         if om.check_access_rights(user,'read',*cls.models) == True:
-            return EntriesModel.get_entries_by_ch_period(ch_id,year,month) if not product else EntriesModel.get_entries_by_product_period(product,ch_id,year,month)
+            return EntriesModel.get_entries_by_ch_period(int(ch_id),year,month,user) if not product else EntriesModel.get_entries_by_product_period(product,ch_id,year,month,user)
         else:
             return om.check_access_rights(user,'read',*cls.models)

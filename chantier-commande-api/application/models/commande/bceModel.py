@@ -143,7 +143,7 @@ class BceModel(DocumentsModel):
     def get_count_bce_by_ch_id_periode(cls,ch_id,user):
 
         try:
-            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), 'purchase.order', 'read_group',[[('chantier_id','=',ch_id)],['create_date'],['create_date']])
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'read_group',[[('chantier_id','=',ch_id)],['create_date'],['create_date']])
             result = []
             temp_dict = {}
             for item in res:
