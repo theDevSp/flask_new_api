@@ -68,6 +68,7 @@ def init_app():
     with app.app_context():
         from application.ressources.userResource import UserLogin,User
         from application.ressources.chantierResource import ChantierResource
+        from application.ressources.chantierResource import UpdateChantierResource
         from application.ressources.enginResource import EnginResource
         from application.ressources.employeeResource import EmployeeResource
         from application.ressources.numPrixResource import NumPrixResource
@@ -79,6 +80,7 @@ def init_app():
         api.add_resource(UserLogin, "/login")
         api.add_resource(User, "/user")
         api.add_resource(ChantierResource, "/chantier")
+        api.add_resource(UpdateChantierResource, "/chantier_chart")
         api.add_resource(EnginResource, "/gmao")
         api.add_resource(EmployeeResource, "/employee")
         api.add_resource(ResponsableResource, "/responsable")

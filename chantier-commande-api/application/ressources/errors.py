@@ -20,6 +20,9 @@ class InvalidUsage(Exception):
         elif 'Fault' in message:
             self.status_code = 500
             self.message = "Erreur interne " + message.split(":")[len(message.split(":"))-1].replace(']\'>','')
+        elif 'Aucun utilisateur trouver' in message:
+            self.status_code = 409
+            self.message = message
         
         self.message = message
         self.payload = payload

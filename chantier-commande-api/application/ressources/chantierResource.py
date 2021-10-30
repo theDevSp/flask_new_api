@@ -29,3 +29,24 @@ class ChantierResource(Resource):
             return ChantierModel.get_chantier_by_user_id(user)
         else:
             return om.check_access_rights(user,'read',*cls.models)
+
+class UpdateChantierResource(Resource):
+
+    models = [
+            'res.users',
+            'fleet.vehicle',
+            'fleet.vehicle.chantier',
+            'fleet.vehicle.chantier.users',
+            ]
+
+    @classmethod
+    @jwt_required()
+    def get(cls):
+        ch_id = request.args.get('ch_id', default = 0, type = int)
+
+        user_public_id = get_jwt_identity()
+        user = UserModel.find_by_public_id(user_public_id)
+        if om.check_access_rights(user,'read',*cls.models) == True:
+            return ChantierModel.update_chantier_chart(ch_id,user)
+        else:
+            return om.check_access_rights(user,'read',*cls.models)

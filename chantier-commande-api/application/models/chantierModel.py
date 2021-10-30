@@ -93,3 +93,29 @@ class ChantierModel():
                         })
   
         return res
+    
+    @classmethod
+    def update_chantier_chart(cls,ch_id,user):
+        
+        res = []
+     
+        bce_count = BceModel.get_count_bce_by_ch_id(ch_id,user)
+        bce_count_chantier = BceModel.get_count_bce_by_ch_id_type(ch_id,user,'Chantier')
+        bce_count_engin = BceModel.get_count_bce_by_ch_id_type(ch_id,user,'Engin')
+        bce_count_achat = BceModel.get_count_bce_by_ch_id_service(ch_id,user,'Achat')
+        bce_count_magasin = BceModel.get_count_bce_by_ch_id_service(ch_id,user,'Magasin')
+        
+        bce_count_date = BceModel.get_count_bce_by_ch_id_periode(ch_id,user)
+        
+        
+        res.append({
+                    "id":ch_id,
+                    "bce_count":bce_count,
+                    "bce_count_chantier":bce_count_chantier,
+                    "bce_count_engin":bce_count_engin,
+                    "bce_count_achat":bce_count_achat,
+                    "bce_count_magasin":bce_count_magasin,
+                    "bce_count_date":bce_count_date,                   
+                    })
+  
+        return res
