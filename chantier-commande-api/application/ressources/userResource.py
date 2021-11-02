@@ -51,10 +51,13 @@ class User(Resource):
     def get(cls):
         public_id = get_jwt_identity()
         user = UserModel.find_by_public_id(public_id)
+        
         if not user:
             return {"msg": "user not found"}, 404
+        res = user_schema.dump(user)
+        res['chantier'] = ChantierModel.get_chantier_by_user_id(user)
         
-        return user_schema.dump(user), 200
+        return res, 200
 
     @classmethod
     @jwt_required()
@@ -105,7 +108,7 @@ class UserLogin(Resource):
             chantier_data = ChantierModel.get_chantier_by_user_id(user)
             if user_data:
                 return {"access_token": access_token, "refresh_token": refresh_token,"user":user_data,"chantier":chantier_data}, 200
-
+    
 
 
 class UserLogout(Resource):

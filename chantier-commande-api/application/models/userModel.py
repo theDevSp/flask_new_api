@@ -141,6 +141,7 @@ class UserModel(db.Model):
                         "id":res['employee_id'][0] if not isinstance(res['employee_id'],bool) else 0,
                         "name":res['employee_id'][1] if not isinstance(res['employee_id'],bool) else '',
                         "role":res.get("role",0),
+                        "uid":user.uid
                     }
             else:
                 raise InvalidUsage(str(om.check_access_rights(user,'read',*models)), status_code=410) 
