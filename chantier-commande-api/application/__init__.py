@@ -73,7 +73,7 @@ def init_app():
         from application.ressources.employeeResource import EmployeeResource
         from application.ressources.numPrixResource import NumPrixResource
         from application.ressources.responsbleResource import ResponsableResource
-        from application.ressources.commande.bceResource import BceResource
+        from application.ressources.commande.bceResource import BceResource,FilterBceRessource
         from application.ressources.commande.bceLineResource import BceLineResource
         from application.ressources.entries.globalEntriesByPeriodResource import EntriesResource
         #from application.ressources.add_attribution import add,update
@@ -91,6 +91,7 @@ def init_app():
         api.add_resource(BceLineResource, "/commande_line",endpoint='create-get-line')
         api.add_resource(BceLineResource, "/commande_line/<int:bce_line_id>",endpoint='update-delete-line')
         api.add_resource(EntriesResource, "/entries",endpoint='entries-global-period')
+        api.add_resource(FilterBceRessource, "/searchBce",endpoint='search-bce')
         #api.add_resource(add, "/attribution")
         #api.add_resource(update, "/attribution1")
 

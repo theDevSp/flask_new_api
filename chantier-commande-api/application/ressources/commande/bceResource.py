@@ -26,6 +26,7 @@ class BceResource(Resource):
         line_fields = request.args.get('ln_fd',default="", type= str )
         notif = request.args.get('notif',default=False, type= bool )
         start_id = request.args.get('start_id', default = 0, type = int)
+        start_notif_id = request.args.get('startNotif', default = 0, type = int)
 
         user_public_id = get_jwt_identity()
         user = UserModel.find_by_public_id(user_public_id)
@@ -40,7 +41,7 @@ class BceResource(Resource):
                 resFinal = []
                 for ch in ch_id.split(','):
                     
-                    result = BceModel.get_bce_by_ch_id(int(ch),user,fields.split(','),notif=notif,start=start_id) if fields else BceModel.get_bce_by_ch_id(int(ch),user,notif=notif,start=start_id)    
+                    result = BceModel.get_bce_by_ch_id(int(ch),user,fields.split(','),notif=notif,start=start_id,startNotif=start_notif_id) if fields else BceModel.get_bce_by_ch_id(int(ch),user,notif=notif,start=start_id,startNotif=start_notif_id)    
                     if not notif:
                         for res in result:
                             res['line'] = BceLineModel.get_bce_line_by_bce_id(res['id'],user,BceLineModel.transform_data(line_fields.split(','))) if line_fields else BceLineModel.get_bce_line_by_bce_id(res['id'],user)
@@ -91,3 +92,30 @@ class BceResource(Resource):
             return {"msg": BceModel.delete_bce(bce_id,user)}
         else:
             return om.check_access_rights(user,'unlink',*cls.models)
+
+
+class FilterBceRessource(Resource):
+
+    models = ['stock.external.move',]
+
+    @classmethod
+    @jwt_required()
+    def get(cls):
+        ref = request.args.get('ref', default = "", type = str)
+        types = request.args.get('types', default = "", type = str)
+        ch_id = request.args.get('ch_id', default = 0, type = int)
+        services = request.args.get('services', default = "", type = str)
+        states = request.args.get('states', default = "", type = str)
+        start_id = request.args.get('start_id', default = 0, type = int)
+        date_start = request.args.get('date_start', default = "", type = str)
+        date_end = request.args.get('date_end', default = "", type = str)
+
+        user_public_id = get_jwt_identity()
+        user = UserModel.find_by_public_id(user_public_id)
+        
+        if om.check_access_rights(user,'read',*cls.models) == True:
+           
+           return BceModel.get_filter_bce_by_ch_id(ch_id,user,ref=ref,types=types,services=services,states=states,start=start_id,date_start=date_start,date_end=date_end)
+                
+        else:
+            return om.check_access_rights(user,'read',*cls.models)

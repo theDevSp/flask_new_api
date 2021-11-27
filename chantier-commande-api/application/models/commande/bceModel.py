@@ -33,13 +33,13 @@ class BceModel(DocumentsModel):
     def create_bce(cls,data,user):
 
         bce_data = cls.transform_data(data)
-
+        
         try:
             created_bce_id = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'create', [bce_data])
         except Exception:
             raise InvalidUsage(str(sys.exc_info()[1]))
         
-        return cls.get_bce_by_id(created_bce_id,user,['name','create_uid','create_date','write_date'])
+        return cls.get_bce_by_id(created_bce_id,user)
     
     @classmethod
     def update_bce(cls,id,data,user):
@@ -83,25 +83,82 @@ class BceModel(DocumentsModel):
         return result
     
     @classmethod
-    def get_bce_by_ch_id(cls,ch_id,user,data=['name','type_bon','employee_id','create_uid','service','create_date','state','chantier_id','write_date','note'],start=0,notif=False):
+    def get_bce_by_ch_id(cls,ch_id,user,data=['name','type_bon','employee_id','create_uid','service','create_date','state','chantier_id','write_date','note'],start=0,notif=False,startNotif=0):
         
         
         where = [['chantier_id', '=', ch_id]]
         limit=10
-        if user.role in [3,6]:
+        if user.role in [3]:
             where.append(['type_bon','=','Engin'])
-        if user.role in [2,5]:
+        if user.role in [2]:
             where.append(['type_bon','=','Chantier'])
         if start != 0:
             where.append(['id','<',start])
         if notif:
             where.append(['state','=','draft'])  
+            where.append(['id','>',startNotif])
             limit=''
         
             
         try:
             res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[where],{'fields': data,'limit':limit,'order':"id desc"})
            
+        except Exception:
+            
+            raise InvalidUsage(str(sys.exc_info()[1]))
+
+        return cls.transform_data(res,'client')
+    
+    @classmethod
+    def get_filter_bce_by_ch_id(cls,ch_id,user,ref="",types="",services="",states="",date_start="",date_end="",start=0,data=['name','type_bon','employee_id','create_uid','service','create_date','state','chantier_id','write_date','note']):
+        
+        
+        where = [['chantier_id', '=', ch_id]]
+        if ref != "":
+            where.append(['name','ilike',ref])
+        else:
+            
+            
+            if types != "":
+                if types.endswith(','):
+                    types = types[:-1]
+                condition = []
+                for type in types.split(','):
+                    condition.append(type)
+                where.append(['type_bon','in',[type]])
+            else:
+                if user.role in [3]:
+                    where.append(['type_bon','=','Engin'])
+                if user.role in [2]:
+                    where.append(['type_bon','=','Chantier'])
+            if services != "":
+                if services.endswith(','):
+                    services = services[:-1]
+                condition = []
+                for service in services.split(','):
+                    condition.append(service)
+                where.append(['service','in',[service]])
+            if states != "":
+                if states.endswith(','):
+                    states = states[:-1]
+                condition = []
+                for state in states.split(','):
+                    condition.append(state)
+                where.append(['state','in',[state]])
+            if len(date_start) > 0:
+                
+                where.append(['create_date','>=',date_start])
+            if len(date_end) > 0:
+                where.append(['create_date','<=',date_end])
+            if start != 0:
+                where.append(['id','<',start])
+        
+        
+        
+            
+        try:
+            res = oModel.execute_kw(oDB,  user.uid, user.decryptMsg(user.password), cls._model_bce, 'search_read',[where],{'fields': data,'limit':10,'order':"id desc"})
+            
         except Exception:
             
             raise InvalidUsage(str(sys.exc_info()[1]))
@@ -192,8 +249,8 @@ class BceModel(DocumentsModel):
 
         if direction == 'odoo':
             
-            if 'demandeur' in datas:
-                datas['employee_id'] = datas.pop('demandeur')
+            if 'demId' in datas:
+                datas['employee_id'] = datas.pop('demId')
             if 'type' in datas:
                 datas['type_bon'] = datas.pop('type')
             if 'ch_id' in datas:
@@ -206,8 +263,10 @@ class BceModel(DocumentsModel):
                     data['create_uid'] = data['create_uid'][1]
                     data['created_by'] = data.pop('create_uid')
                 if 'employee_id' in data:
+                    data['demId'] = data['employee_id'][0]
                     data['employee_id'] = data['employee_id'][1]
                     data['demandeur'] = data.pop('employee_id')
+                    
                 if 'chantier_id' in data:
                     data['chantier_id'] = int(data['chantier_id'][0])
                     data['ch_id'] = data.pop('chantier_id')

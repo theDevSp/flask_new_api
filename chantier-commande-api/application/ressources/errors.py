@@ -8,9 +8,9 @@ class InvalidUsage(Exception):
         
         if status_code is not None:
             self.status_code = status_code
-        elif 'Errno 111' in message:
+        elif 'Errno 11' in message:
             self.status_code = 503
-            self.message = "Service blocké ou serveur non disponible veuillez réessayer plus tard"
+            self.message = "Service blocké ou serveur non disponible veuillez réessayer plus tard.\nSi le Problème pérciste contactez votre admnistrateur"
         elif 'été supprimé ' in message:
             self.status_code = 404
             self.message = "L'un des documents que vous voulez accéder a été supprimé ou n'existe plus"

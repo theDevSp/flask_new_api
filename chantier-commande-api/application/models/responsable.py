@@ -1,6 +1,7 @@
 from flask import current_app
 from application.om import OdooModel as om 
-
+from application.ressources.errors import InvalidUsage
+import sys
 
 oModel = om.ODOO_MODEL
 oCommon = om.ODOO_COMMON
@@ -25,10 +26,14 @@ class ResponsableModel():
         
         res = []
         responsable_list = []
-        for _momdel in cls._model_resp:
-            for result in oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+        try:
+            for _momdel in cls._model_resp:
+                for result in oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                         _momdel, 'search_read',[[['chantier_id', '=', ch_id],['current', '=',True]]],{'fields': ['employee_id']}):
-                responsable_list.append(result)
+                    responsable_list.append(result)
+        except Exception:                
+            raise InvalidUsage(str(sys.exc_info()[1]))
+        
         
         
         for responsable in responsable_list:
@@ -44,9 +49,14 @@ class ResponsableModel():
         
         res = []
         responsable_list = []
-        for _momdel in cls._model_resp:
-            responsable_list.append(oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
-                        _momdel,'search_read',[[['employee_id', '=', resp_id]]],{'fields': ['employee_id','job_id']}))
+
+        try:
+            for _momdel in cls._model_resp:
+                responsable_list.append(oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+                    _momdel,'search_read',[[['employee_id', '=', resp_id]]],{'fields': ['employee_id','job_id']}))
+        except Exception:                
+            raise InvalidUsage(str(sys.exc_info()[1]))
+        
         
         
         for responsable in responsable_list:

@@ -53,7 +53,7 @@ class User(Resource):
         user = UserModel.find_by_public_id(public_id)
         
         if not user:
-            return {"msg": "user not found"}, 404
+            return {"msg": "Veuillez vous reconnectez car votre session est expirée"}, 409
         res = user_schema.dump(user)
         res['chantier'] = ChantierModel.get_chantier_by_user_id(user)
         

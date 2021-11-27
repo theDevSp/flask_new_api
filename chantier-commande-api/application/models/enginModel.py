@@ -1,5 +1,7 @@
 from flask import current_app
 from application.om import OdooModel as om
+from application.ressources.errors import InvalidUsage
+import sys
 
 #eKey = current_app.config['ENCRYPTION_KEY']
 oModel = om.ODOO_MODEL
@@ -22,10 +24,14 @@ class EnginModel():
     def get_engin_by_ch_id(cls,ch_id,user):
         res = []
 
-        enginList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+        try:
+            enginList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                 cls._model_gmao, 'search_read',
                 [[['chantier_id', '=', ch_id],['state_breakdown','not in',('vendu','rendu','deteriore')]]],
                 {'fields': ['code','license_plate','product_id','designation_id','brand_id','emplacement_chantier_id','state_breakdown','capacity']})
+        except Exception:                
+            raise InvalidUsage(str(sys.exc_info()[1]))
+        
         for engin in enginList:
             res.append({
                 "id":engin.get("id",0),

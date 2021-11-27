@@ -9,6 +9,9 @@ from application.models.entries.entriesModel import EntriesModel
 from application.models.responsable import ResponsableModel
 from application.models.numPrixModel import NumPrixModel
 import datetime as dt
+from application.ressources.errors import InvalidUsage
+import sys
+
 oModel = om.ODOO_MODEL
 oCommon = om.ODOO_COMMON
 oDB = om.ODOO_DB
@@ -41,14 +44,25 @@ class ChantierModel():
             model = cls._model_ch_users[0]
         else:
             model = cls._model_ch_users[2]
-        chantierList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+        
+        try:
+            chantierList = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                  model, 'search_read',
                 [[['employee_id','=',user.employee_id]]],{'fields': ['chantier_id']})
+        except Exception:
+            
+            raise InvalidUsage(str(sys.exc_info()[1]))
+        
         
         for chantier in chantierList:
             ch_id = chantier['chantier_id'][0]
-            ch_info = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
+
+            try:
+                ch_info = oModel.execute_kw(oDB, user.uid, user.decryptMsg(user.password),
                     cls._model_ch, 'search_read',[[['id','=',ch_id]]],{'fields': ['usinage','atelier_stock','type','create_date']})
+            except Exception:                
+                raise InvalidUsage(str(sys.exc_info()[1]))
+            
             engins = EnginModel.get_engin_by_ch_id(ch_id,user)
             #employees = EmployeeModel.get_employee_by_ch_id(ch_id,user)
             responsables = ResponsableModel.get_responsable_by_ch_id(ch_id,user)
